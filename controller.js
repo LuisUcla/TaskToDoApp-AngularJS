@@ -87,6 +87,7 @@ app.controller('crudController', function($scope) {
             : 'completed'
         }
         $scope.setData($scope.taskList);
+        $scope.clearModel()
     }
 
     $scope.change = function(value) {
