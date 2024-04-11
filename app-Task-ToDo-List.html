@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Task To Do App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js "></script>
+</head>
+
+</head>
+<body ng-app="crudApp" ng-controller="crudController">
+    <div style="overflow: scroll; height: 100%;">
+ 
+        <div class="container pt-5" ng-init="getData()">
+            <div ng-if="success" class="alert alert-success">
+                {{successMessage}}
+            </div>
+    
+            <div class="row p-3 d-flex" style="gap: 10px;">
+                <div class="text-bg-light col-lg-12 col-sm-12 border border-secondary rounded p-3">
+                    <h3 class="fw-bold">Task To Do App</h3>
+    
+                    <form ng-submit="save()">
+                        <input ng-model="id" name="id" type="hidden"  id="id" >
+    
+                        <div class="mb-3">
+                          <label for="title" class="form-label">Title</label>
+                          <input ng-model="title" name="title" placeholder="Title:" type="text" class="form-control" id="title" >
+                        </div>
+    
+                        <div class="mb-3">
+                          <label for="description" class="form-label">Descrption</label>
+                          <textarea ng-model="description" name="description" placeholder="Description task:" type="text" class="form-control" id="description" rows="3"></textarea>
+                        </div>
+                       
+                        <button type="submit" class="btn btn-primary">Save Task</button>
+                        <button ng-click="clearModel()" type="button" class="btn btn-outline-primary">Cancel</button>
+                    </form>
+                </div>
+                <div class="text-bg-light col-lg-12 col-sm-12 border border-secondary rounded p-3">
+                    <h3 class="fw-bold">List Tasks</h3>
+                    <!-- card Task -->
+    
+                    <select ng-model="editChange" ng-change="change(editChange)" class=" w-50 mb-3 form-select">
+                        <option value="all" selected>All</option>
+                        <option value="pending" >Pending</option>
+                        <option value="completed">Completed</option>
+                    </select>
+    
+                    <div ng-if="taskList.length > 0">
+                        <div ng-repeat="task in taskList track by $index"
+                            ng-class="{ 
+                                'border-warning bg-warning bg-opacity-10': task.status == 'pending',
+                                'border-success bg-success opacity-50 bg-gradient bg-opacity-25': task.status == 'completed'
+                            }"
+                            class="card cardTask shadow">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between">
+                                    <h5 
+                                        ng-Class="task.status == 'completed' ? 'text-decoration-line-through text-danger' : ''"
+                                        class="card-title fw-bold"
+                                    >
+                                        {{task.title}}
+                                    </h5>
+                                    <input
+                                        ng-click="taskCompleted(task.id)"
+                                        class="form-check-input text-success mt-0" 
+                                        type="checkbox" 
+                                        ng-checked="task.status == 'completed' ? true : false " 
+                                        id="defaultCheck1"
+                                    >                    
+                                </div>
+                        
+                                <p 
+                                    ng-Class="task.status == 'completed' ? 'text-decoration-line-through text-danger' : ''" 
+                                    class="card-text mb-1"
+                                >
+                                    {{task.description}}
+                                </p>
+                        
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-secondary text-capitalize">{{task.status}}</small>
+                                    <div>
+                                        <button ng-disabled="task.status !== 'pending'" ng-click="selectTaskEdit(task.id)" type="button" class="btn btn-link p-0" >
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="green" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                                <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                                                <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/>
+                                            </svg>
+                                        </button>
+    
+                                        <button type="button" class="btn btn-link p-0" data-bs-toggle="modal" data-bs-target="#modalDelete" ng-click="selectTaskDelete(task.id)">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="red" class="bi bi-trash" viewBox="0 0 16 16">
+                                                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                                                <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 d-flex justify-content-center align-items-center" ng-if="taskList.length == 0">
+                        <p class="fw-bold">List empty...</p>
+                    </div>
+                </div>
+            </div>  
+        </div>
+    </div>
+
+    <!-- modal confirm delete -->
+    
+    <div class="modal fade" id="modalDelete" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fw-bold fs-5" id="exampleModalLabel">Delete task</h1>
+              <button  type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure to delete the task?
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Cancel</button>
+              <button ng-click="deleteTask()" type="button"  data-bs-dismiss="modal" class="btn btn-danger">Delete</button>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+
+    <script>
+        const app = angular.module('crudApp', []);
+
+        app.controller('crudController', function($scope) {
+
+
+        $scope.taskList = [];
+        $scope.success = false;
+        $scope.successMessage = '';
+        $scope.error = false;
+        $scope.editChange = 'all'
+    
+
+        $scope.getData = function() {
+            const tasksDB = localStorage.getItem("task");
+            $scope.taskList = tasksDB ? JSON.parse(tasksDB) : [];
+        }
+
+        $scope.setData = function(tasks) {
+            localStorage.setItem("task", JSON.stringify(tasks));
+        }
+
+        $scope.selectTaskEdit = function(id) {
+            const task = $scope.taskList.find(task => task.id == id);
+            $scope.id = task.id;
+            $scope.title = task.title;
+            $scope.description = task.description;
+        }
+
+        $scope.selectTaskDelete = function(id) {
+            $scope.id = id;
+        }
+
+        $scope.save = function() {
+            if ($scope.title && $scope.description) {
+                if ($scope.id) {
+                    $scope.editTask($scope.id);
+                    $scope.id = 0
+                } else {
+                    $scope.getData();
+                    const task = {
+                        id: $scope.taskList.length > 0 ? $scope.taskList[$scope.taskList.length - 1].id + 1 : 1,
+                        title: $scope.title,
+                        description: $scope.description,
+                        status: 'pending'
+                    }
+                    $scope.taskList.push(task);
+                    $scope.message('Add task successfull...')
+                }
+        
+                $scope.setData($scope.taskList);
+                $scope.clearModel();
+            }
+        }
+
+        $scope.clearModel = function() {
+            $scope.id = 0;
+            $scope.title = '';
+            $scope.description = '';
+        }
+
+        $scope.editTask = function(id) {
+            const index = $scope.taskList.findIndex(task => task.id == id);
+
+            $scope.taskList[index].title = $scope.title;
+            $scope.taskList[index].description = $scope.description;
+            $scope.setData($scope.taskList);
+            $scope.message('Edit task successfull...');
+        }
+
+        $scope.deleteTask = function() {
+            $scope.getData()
+            const index = $scope.taskList.findIndex(task => task.id == $scope.id);
+            
+            $scope.taskList.splice(index,1);
+            $scope.setData($scope.taskList);
+            $scope.clearModel();
+            $scope.message('Delete task successfull...');
+        }
+
+        $scope.taskCompleted = function(id) {
+            $scope.getData()
+            const index = $scope.taskList.findIndex(task => task.id == id);
+
+            if (index != -1) {
+                $scope.taskList[index].status =  $scope.taskList[index].status == 'completed'
+                ? 'pending'
+                : 'completed'
+            }
+            $scope.setData($scope.taskList);
+            $scope.clearModel()
+        }
+
+        $scope.change = function(value) {
+            $scope.getData();
+            const filter = $scope.taskList.filter(task => value == 'all' ? true : task.status == value);
+            $scope.taskList = filter;
+
+        }
+
+        $scope.message = function(message) {
+            $scope.success = true;
+            $scope.successMessage = message;
+
+            setTimeout(() => {
+                $scope.success = false;
+            }, 2500);
+        }
+})
+    </script>
+    <style>
+        html {
+            height: 100%;
+        }
+        body { background-image: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab); height: 100%; background-repeat: no-repeat;}
+        input[type='checkbox'] { 
+            font-size: 1.5rem;
+            margin-right: 3px;
+        }
+
+        .cardTask {
+            margin-bottom: 20px;
+        }
+
+        form button {
+            width: 6rem;
+        }
+    </style>
+</body>
+</html>

@@ -1,0 +1,5 @@
+Instrucciones: 
+
+Abrir archivo app-task-ToDo-List.html en el navegador de preferencia.
+
+Una vez abierto y debido a ser solo un archivo html, allí estará todo el funcionamiento.
